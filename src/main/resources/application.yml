@@ -1,0 +1,100 @@
+spring:
+  application:
+    name: notification-system
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_db
+    username: sandeepkumaryadav
+    password: 
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+  
+  security:
+    jwt:
+      secret: mySecretKey123456789012345678901234567890
+      expiration: 86400000 # 24 hours in milliseconds
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USERNAME:sandeep.yadav1205@gmail.com}
+    password: ${SMTP_PASSWORD:zciennyxsbvhobvr}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  kafka:
+    bootstrap-servers: ${notification.kafka.bootstrap-servers:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.notification.system.model.dto"
+        spring.json.value.default.type: "com.notification.system.model.dto.event.NotificationEvent"
+      auto-offset-reset: earliest
+
+server:
+  port: 8080
+
+notification:
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  channels:
+    email:
+      smtp:
+        enabled: true # Set to true to use real SMTP, false for console logging
+      console:
+        enabled: true # Set to false to disable console email logging
+    sms:
+      twilio:
+        enabled: false # Set to true to use real Twilio SMS, false for console logging
+        account-sid: ${TWILIO_ACCOUNT_SID:your-account-sid}
+        auth-token: ${TWILIO_AUTH_TOKEN:your-auth-token}
+        from-number: ${TWILIO_FROM_NUMBER:+1234567890}
+      console:
+        enabled: true # Set to false to disable console SMS logging
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.notification.system: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/notification-system.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 300MB

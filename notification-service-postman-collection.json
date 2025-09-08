@@ -1,0 +1,283 @@
+{
+  "info": {
+    "name": "Notification Service API",
+    "description": "Complete API collection for the notification service with all endpoints and sample payloads",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john_doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securePassword123\",\n  \"phoneNumber\": \"+1234567890\",\n  \"role\": \"USER\",\n  \"preferredChannels\": [\"EMAIL\", \"SMS\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Create a new user for testing purposes"
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users"]
+            },
+            "description": "Retrieve all users"
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "users", "1"]
+            },
+            "description": "Retrieve a specific user by ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Send Immediate Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"title\": \"Welcome!\",\n  \"content\": \"Welcome to our notification service. We're glad to have you!\",\n  \"channelType\": \"EMAIL\",\n  \"priority\": \"HIGH\",\n  \"metadata\": {\n    \"source\": \"registration\",\n    \"template\": \"welcome_email\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications"]
+            },
+            "description": "Send an immediate notification"
+          }
+        },
+        {
+          "name": "Send Scheduled Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"title\": \"Appointment Reminder\",\n  \"content\": \"Don't forget about your appointment tomorrow at 10:00 AM\",\n  \"channelType\": \"SMS\",\n  \"priority\": \"MEDIUM\",\n  \"scheduledAt\": \"2025-09-07T16:56:51\",\n  \"metadata\": {\n    \"appointmentId\": \"12345\",\n    \"reminderType\": \"24h_before\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications"]
+            },
+            "description": "Send a scheduled notification"
+          }
+        },
+        {
+          "name": "Send Push Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"title\": \"New Message\",\n  \"content\": \"You have received a new message from John\",\n  \"channelType\": \"PUSH\",\n  \"priority\": \"HIGH\",\n  \"metadata\": {\n    \"senderId\": \"user_123\",\n    \"messageId\": \"msg_456\",\n    \"deepLink\": \"/messages/msg_456\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications"]
+            },
+            "description": "Send a push notification"
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "1"]
+            },
+            "description": "Retrieve a specific notification by its ID"
+          }
+        },
+        {
+          "name": "Get User Notifications (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/user/1?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "user", "1"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Retrieve paginated notifications for a specific user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Batch Notifications",
+      "item": [
+        {
+          "name": "Send Batch Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [1, 2, 3, 4, 5],\n  \"title\": \"System Maintenance Notice\",\n  \"content\": \"Our system will be under maintenance from 2:00 AM to 4:00 AM EST. Please plan accordingly.\",\n  \"channelType\": \"EMAIL\",\n  \"priority\": \"HIGH\",\n  \"scheduledAt\": \"2025-09-07T16:56:51\",\n  \"metadata\": {\n    \"maintenanceId\": \"maint_2025_001\",\n    \"affectedServices\": [\"api\", \"web\", \"mobile\"],\n    \"estimatedDuration\": \"2 hours\"\n  },\n  \"batchSettings\": {\n    \"batchSize\": 50,\n    \"delayBetweenBatches\": 1000,\n    \"parallelProcessing\": true,\n    \"continueOnError\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "batch"]
+            },
+            "description": "Send notifications to multiple users with batch processing"
+          }
+        },
+        {
+          "name": "Send Large Batch Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],\n  \"title\": \"Important Update\",\n  \"content\": \"We have important updates regarding your account. Please check your dashboard for more details.\",\n  \"channelType\": \"SMS\",\n  \"priority\": \"MEDIUM\",\n  \"metadata\": {\n    \"updateType\": \"account_security\",\n    \"urgency\": \"moderate\"\n  },\n  \"batchSettings\": {\n    \"batchSize\": 10,\n    \"delayBetweenBatches\": 2000,\n    \"parallelProcessing\": false,\n    \"continueOnError\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "notifications", "batch"]
+            },
+            "description": "Send notifications to a larger batch of users with custom processing settings"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Available Channels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/channels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "channels"]
+            },
+            "description": "Retrieve all available notification channels"
+          }
+        },
+        {
+          "name": "Get System Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "status"]
+            },
+            "description": "Retrieve system health and status information"
+          }
+        },
+        {
+          "name": "Get Scheduler Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/scheduler/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "scheduler", "info"]
+            },
+            "description": "Retrieve Quartz scheduler information"
+          }
+        },
+        {
+          "name": "Cancel Scheduled Notification",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/scheduler/cancel/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "admin", "scheduler", "cancel", "1"]
+            },
+            "description": "Cancel a scheduled notification job"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "description": "Base URL for the notification service API"
+    }
+  ]
+}
