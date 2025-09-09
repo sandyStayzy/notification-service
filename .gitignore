@@ -1,0 +1,9 @@
+# Ignore target directory
+target/
+
+# Allow jar files in target directory
+!target/**/*.jar
+
+# Ignore log files
+*.log
+logs/
