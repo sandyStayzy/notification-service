@@ -8,12 +8,27 @@ A scalable, extensible notification system built with Spring Boot that supports 
 - Java 17+
 - PostgreSQL 12+
 - Maven 3.8+
+- Apache Kafka (via Homebrew)
 
 ### Setup Database
 ```sql
 CREATE DATABASE notification_db;
 CREATE USER postgres WITH ENCRYPTED PASSWORD 'password';
 GRANT ALL PRIVILEGES ON DATABASE notification_db TO postgres;
+```
+
+### Install Dependencies (macOS with Homebrew)
+```bash
+# Install PostgreSQL
+brew install postgresql
+brew services start postgresql
+
+# Install Kafka
+brew install kafka
+brew services start kafka
+
+# Verify services are running
+brew services list | grep -E "(postgresql|kafka)"
 ```
 
 ### Run Application
@@ -37,8 +52,8 @@ brew services start postgresql
 # Create database if it doesn't exist
 createdb -U sandeepkumaryadav notification_db
 
-# Optional: Start Kafka
-docker-compose -f docker-compose-kafka.yml up -d
+# Optional: Start Kafka (if not already running)
+brew services start kafka
 
 # Start the application
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
@@ -49,21 +64,25 @@ mvn clean package
 java -jar target/notification-system-1.0.0-SNAPSHOT.jar
 ```
 
-**Alternative one-liner to kill port 8080 and start:**
+#### Option 3: JAR File Execution
 ```bash
-# Kill port 8080 and start application in one command
-lsof -ti:8080 | xargs kill -9 2>/dev/null || true && mvn spring-boot:run
+# Build the JAR file
+mvn clean package -DskipTests
+
+# Run the JAR in foreground
+java -jar target/notification-system-1.0.0-SNAPSHOT.jar
+
 ```
 
 ### Stop Application
 ```bash
 # If running with mvn spring-boot:run, use Ctrl+C to stop
 
-# If running as background process, find and kill the process
-ps aux | grep notification-system
-kill <PID>
+# Or find PID and send SIGTERM
+PID=$(jps -v | grep notification-system | awk '{print $1}')
+kill -TERM $PID
 
-# Or use pkill
+# Force kill if unresponsive
 pkill -f "notification-system"
 ```
 
@@ -159,78 +178,3 @@ curl http://localhost:8080/api/v1/notifications/user/1?page=0&size=10
 - **Scheduler**: Quartz
 - **Documentation**: OpenAPI 3 (Swagger)
 - **Testing**: JUnit 5
-
-## Current Features (Phase 1)
-
-✅ **Core Notification System**
-- Send immediate notifications
-- Multiple channel support (EMAIL, SMS, PUSH)
-- Priority-based processing (HIGH, MEDIUM, LOW)
-- User management
-- Notification status tracking
-
-✅ **Batch Processing**
-- Send notifications to multiple users simultaneously
-- Configurable batch sizes and processing delays
-- Parallel and sequential processing modes
-- Continue-on-error handling
-- Detailed batch statistics and reporting
-
-✅ **SMTP Email Integration**
-- Real Gmail SMTP email delivery
-- Beautiful HTML email formatting with styling
-- Professional email templates
-- Both console and SMTP channel support
-
-✅ **Scheduled Notifications**
-- Quartz scheduler integration
-- Schedule notifications for future delivery
-- Reschedule and cancel capabilities
-- Persistent job management
-
-✅ **Database Design**
-- User preferences and contact information
-- Notification history and metadata
-- Scheduled job management
-
-✅ **RESTful APIs**
-- Send notifications
-- Send batch notifications
-- Query notification status
-- User notification history
-- Pagination support
-
-✅ **Console Channels**
-- Email and SMS notifications logged to console
-- Demonstrates multi-channel architecture
-
-## Planned Features (Next Phases)
-
-🔄 **Phase 2 - Resilience & Performance**
-- Circuit breaker pattern for external services
-- Advanced retry mechanisms with exponential backoff
-- Rate limiting and throttling
-- Redis caching for improved performance
-
-🔄 **Phase 3 - Security & Monitoring**  
-- JWT authentication and authorization
-- API security enhancements
-- Comprehensive monitoring and metrics
-- Health checks and observability
-
-🔄 **Phase 4 - Production Ready**
-- Kafka event streaming for high volume
-- Docker containerization
-- Kubernetes deployment configuration
-- Advanced load balancing and scaling
-
-## Development Status
-
-This is currently a **working MVP** demonstrating:
-- Clean architecture with separation of concerns
-- Extensible design patterns
-- RESTful API design
-- Database modeling for scale
-- Foundation for advanced features
-
-The system is designed to handle millions of notifications through its layered architecture and can be easily extended with additional channels and features.

@@ -30,10 +30,11 @@ if ! psql -h localhost -U sandeepkumaryadav -d notification_db -c '\q' >/dev/nul
     createdb -U sandeepkumaryadav notification_db 2>/dev/null || echo "Database might already exist"
 fi
 
-# Optional: Start Kafka if docker-compose file exists
-if [ -f "docker-compose-kafka.yml" ] && ! lsof -i :9092 >/dev/null 2>&1; then
+# Check if Kafka is running, start if needed
+if ! lsof -i :9092 >/dev/null 2>&1; then
     echo "🔄 Starting Kafka (optional)..."
-    docker-compose -f docker-compose-kafka.yml up -d || echo "⚠️  Kafka startup failed, continuing without it"
+    brew services start kafka || echo "⚠️  Kafka startup failed, continuing without it"
+    sleep 2
 fi
 
 echo "✅ All dependencies ready!"

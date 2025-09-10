@@ -106,7 +106,7 @@ start_postgresql() {
     return 1
 }
 
-# Function to check and start Kafka (using Docker Compose)
+# Function to check and start Kafka (using Homebrew)
 start_kafka() {
     print_message $BLUE "Checking Kafka status..."
     
@@ -115,17 +115,17 @@ start_kafka() {
         return 0
     fi
     
-    print_message $YELLOW "Kafka not running. Starting Kafka via Docker Compose..."
+    print_message $YELLOW "Kafka not running. Starting Kafka via Homebrew..."
     
-    if [ -f "docker-compose-kafka.yml" ]; then
-        # Start Kafka using docker-compose
-        docker-compose -f docker-compose-kafka.yml up -d
+    # Start Kafka using homebrew
+    if command -v brew >/dev/null 2>&1; then
+        brew services start kafka
         
         if wait_for_service "Kafka" $KAFKA_PORT $MAX_WAIT_TIME; then
             return 0
         fi
     else
-        print_message $YELLOW "docker-compose-kafka.yml not found. Kafka will be disabled."
+        print_message $YELLOW "Homebrew not found. Please install Kafka manually."
         export KAFKA_ENABLED=false
         return 0
     fi
