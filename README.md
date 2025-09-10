@@ -50,7 +50,7 @@ Use the provided startup scripts that automatically ensure all dependencies are 
 brew services start postgresql
 
 # Create database if it doesn't exist
-createdb -U sandeepkumaryadav notification_db
+createdb -U notification_db_user notification_db
 
 # Optional: Start Kafka (if not already running)
 brew services start kafka

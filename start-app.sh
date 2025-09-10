@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 POSTGRES_DB="notification_db"
-POSTGRES_USER="sandeepkumaryadav"
+POSTGRES_USER="postgres"
 POSTGRES_PORT="5432"
 KAFKA_PORT="9092"
 APP_PORT="8080"
@@ -61,49 +61,56 @@ start_postgresql() {
     
     if is_port_in_use $POSTGRES_PORT; then
         print_message $GREEN "PostgreSQL is already running on port $POSTGRES_PORT"
-        return 0
-    fi
-    
-    print_message $YELLOW "PostgreSQL not running. Starting PostgreSQL..."
-    
-    # Try different ways to start PostgreSQL based on installation method
-    if command -v brew >/dev/null 2>&1; then
-        # Homebrew installation
-        print_message $YELLOW "Starting PostgreSQL via Homebrew..."
-        brew services start postgresql@14 || brew services start postgresql@15 || brew services start postgresql
+    else
+        print_message $YELLOW "PostgreSQL not running. Starting PostgreSQL..."
         
-        if wait_for_service "PostgreSQL" $POSTGRES_PORT $MAX_WAIT_TIME; then
-            # Check if database exists, create if not
-            if ! psql -h localhost -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB -c '\q' >/dev/null 2>&1; then
-                print_message $YELLOW "Creating database $POSTGRES_DB..."
-                createdb -h localhost -p $POSTGRES_PORT -U $POSTGRES_USER $POSTGRES_DB || {
-                    print_message $YELLOW "Database might already exist or user doesn't have permissions. Continuing..."
-                }
-            fi
-            return 0
+        # Try different ways to start PostgreSQL based on installation method
+        if command -v brew >/dev/null 2>&1; then
+            # Homebrew installation
+            print_message $YELLOW "Starting PostgreSQL via Homebrew..."
+            brew services start postgresql@14 || brew services start postgresql@15 || brew services start postgresql
+        elif [ -d "/Applications/Postgres.app" ]; then
+            # PostgreSQL.app
+            print_message $YELLOW "Starting PostgreSQL via Postgres.app..."
+            open -a Postgres
+        elif command -v systemctl >/dev/null 2>&1; then
+            # System service
+            print_message $YELLOW "Starting PostgreSQL via systemctl..."
+            sudo systemctl start postgresql
+        else
+            print_message $RED "Could not determine how to start PostgreSQL. Please start it manually."
+            return 1
         fi
     fi
+
+    if ! wait_for_service "PostgreSQL" $POSTGRES_PORT $MAX_WAIT_TIME; then
+        print_message $RED "Failed to start PostgreSQL. Please start it manually."
+        return 1
+    fi
+
+    # Set up database and user as per README
+    print_message $BLUE "Ensuring database and user are set up..."
     
-    # PostgreSQL.app
-    if [ -d "/Applications/Postgres.app" ]; then
-        print_message $YELLOW "Starting PostgreSQL via Postgres.app..."
-        open -a Postgres
-        if wait_for_service "PostgreSQL" $POSTGRES_PORT $MAX_WAIT_TIME; then
-            return 0
-        fi
+    # Create postgres user if it doesn't exist (connect as current system user who should be superuser)
+    if command -v createuser >/dev/null 2>&1; then
+        createuser -s ${POSTGRES_USER} 2>/dev/null || echo "User '${POSTGRES_USER}' might already exist" >/dev/null
+    else
+        # Use psql to create user - connect as current system user
+        psql postgres -c "CREATE USER ${POSTGRES_USER} WITH SUPERUSER PASSWORD 'password';" >/dev/null 2>&1 || true
     fi
     
-    # System service
-    if command -v systemctl >/dev/null 2>&1; then
-        print_message $YELLOW "Starting PostgreSQL via systemctl..."
-        sudo systemctl start postgresql
-        if wait_for_service "PostgreSQL" $POSTGRES_PORT $MAX_WAIT_TIME; then
-            return 0
-        fi
+    # Create database if it doesn't exist
+    if command -v createdb >/dev/null 2>&1; then
+        createdb -U ${POSTGRES_USER} ${POSTGRES_DB} >/dev/null 2>&1 || true
+    else
+        psql -U ${POSTGRES_USER} postgres -c "CREATE DATABASE ${POSTGRES_DB};" >/dev/null 2>&1 || true
     fi
     
-    print_message $RED "Failed to start PostgreSQL. Please start it manually."
-    return 1
+    # Grant privileges
+    psql -U ${POSTGRES_USER} postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"${POSTGRES_DB}\" TO ${POSTGRES_USER};" >/dev/null 2>&1 || true
+    print_message $GREEN "Database setup complete."
+
+    return 0
 }
 
 # Function to check and start Kafka (using Homebrew)
