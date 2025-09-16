@@ -166,8 +166,11 @@ main() {
         exit 1
     fi
     
-    # Set Java version
-    export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home
+    # Set Java version - auto-detect or use the correct path
+    if [ -z "$JAVA_HOME" ]; then
+        export JAVA_HOME=/Users/divyamaheshwari/Library/Java/JavaVirtualMachines/corretto-21.0.2/Contents/Home
+        print_message $BLUE "Setting JAVA_HOME to: $JAVA_HOME"
+    fi
     
     # Start PostgreSQL
     if ! start_postgresql; then
